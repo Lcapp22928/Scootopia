@@ -6,10 +6,13 @@ public class ScooterMovement : MonoBehaviour{
     public float speed;
     public float rotationSpeed;
     public float jumpSpeed;
-    
+    public float speedBoostMultiplier = 2.0f; // Adjust as needed
+
     private CharacterController characterController;
     private float ySpeed;
     private float originalStepOffset;
+    private bool isSpeedBoosted = false;
+    public float boostTime = 10.0f;
 
     void Start()
     {
@@ -31,18 +34,25 @@ public class ScooterMovement : MonoBehaviour{
 
         ySpeed += Physics.gravity.y * Time.deltaTime;
 
-        if(characterController.isGrounded){
+        if (characterController.isGrounded)
+        {
             characterController.stepOffset = originalStepOffset;
             ySpeed = -0.5f;
-        if (Input.GetButtonDown("Jump")){
-            ySpeed = jumpSpeed;
-
+            if (Input.GetButtonDown("Jump"))
+            {
+                ySpeed = jumpSpeed;
+            }
         }
-        }
-        else{
+        else
+        {
             characterController.stepOffset = 0;
         }
 
+        // Apply speed boost if active
+        if (isSpeedBoosted)
+        {
+            magnitude *= speedBoostMultiplier;
+        }
 
         // move character in the specificied direction and speed around the map... once char controller introduced this is not needed
         // transform.Translate(movementDirection * speed * Time.deltaTime, Space.World); 
@@ -56,6 +66,19 @@ public class ScooterMovement : MonoBehaviour{
             Quaternion toRotation = Quaternion.LookRotation(movementDirection, Vector3.up);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
         }
+    }
+
+    public void ApplySpeedBoost()
+    {
+        // Apply speed boost effect
+        isSpeedBoosted = true;
+        Invoke("RemoveSpeedBoost", boostTime); // Remove speed boost after 10 seconds, adjust as needed
+    }
+
+    private void RemoveSpeedBoost()
+    {
+        // Remove speed boost effect
+        isSpeedBoosted = false;
     }
 }
  /*  
